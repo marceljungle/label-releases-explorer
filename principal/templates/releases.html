@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block encabezado %}
+<h1> Releases by label </h1>
+{% endblock %}
+
+{% block contenido %}
+
+        <form id="formulario" method="post" action=''>{% csrf_token %}
+    		{{formulario}}
+    		<input type='submit' value='Search'/>
+    	</form>
+        <div>
+            <ul>
+        {% if releases %}
+		    <h3> Total label releases:  {{ releases|length }}</h3>
+			{% for row in releases %}
+                <li>
+                    <img src="{{row.image}}">
+                    <h3>Artist: {{row.artist}}</h3>
+                    <h4>Album Name: {{row.title}}</h4>
+                    <p>Catalog Nº: {{row.catalog_number}}</p>
+                    <p>Year: {{row.year}}</p>
+                </li>    
+			{% endfor %}
+
+			</dl>
+
+		{% endif %}
+    
+{% endblock %}
