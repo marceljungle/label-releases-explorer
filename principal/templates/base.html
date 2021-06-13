@@ -6,16 +6,16 @@
   <style>
    {% block style_css %}{% endblock %}
   </style>
-
   <link rel="stylesheet" type="text/css" href="{% static 'css/list_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/main_style.css' %}">
 </head>
 <body>
   <header> 
   	{% block encabezado %}{% endblock %}
 
  			<dd><a href='/'>Home</a></dd>
-      <dd><a href='/discogsreleasesbylabel'>Discogs releases by label</a></dd>
-			<dd><a href='/beatportreleasesbylabel'>Beatport releases by label</a></dd>
+      <dd><a href='/releasesbylabeldiscogs'>Discogs releases by label</a></dd>
+			<dd><a href='/releasesbylabelbeatport'>Beatport releases by label</a></dd>
 	<hr>
   </header>
   <section>

@@ -24,6 +24,8 @@ urlpatterns = [
     path('ingresar/', views.ingresar),
     path('carga/', populate.populateDatabase),
     path('inicio/', views.inicio),
-    path('populate/', populate.populateDatabase),
-    path('releasesbylabel/', views.show_releases_by_label)
+    path('releasesbylabelbeatport/', views.show_releases_by_label_beatport),
+    path('releasesbylabeldiscogs/', views.show_releases_by_label_discogs),
+    path('releasesdiscogs/', views.show_releases_discogs),
+    path('releasesbeatport/', views.show_releases_beatport)
 ]

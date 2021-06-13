@@ -1,6 +1,7 @@
-from principal.models import Release
+from principal.models import ReleasesDiscogs, ReleasesBeatport
 from django.contrib import admin
 
 # Register your models here.
 
-admin.site.register(Release)
+admin.site.register(ReleasesDiscogs)
+admin.site.register(ReleasesBeatport)

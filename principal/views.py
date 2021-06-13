@@ -3,34 +3,68 @@ from django.db.models import Avg, Count
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from datetime import datetime
-from principal.models import Release
+from principal.models import ReleasesDiscogs, ReleasesBeatport
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from principal.forms import byLabel
-from principal.populate import populate_labels_by_discogs
+from principal.populate import populate_labels_by_discogs, populate_releases_by_label_beatport
 
 path = "data"
 
 # Create your views here.
 
 
-def show_releases_by_label(request):
+def show_releases_by_label_discogs(request):
     formulario = byLabel()
     fecha = 0
     releases = []
+    page_type = "discogs"
     if request.method == 'POST':
         formulario = byLabel(request.POST)
         if formulario.is_valid():
-            releasesList = Release.objects.all()
+            releasesList = ReleasesDiscogs.objects.all()
             label = formulario.cleaned_data['label']
             populate_labels_by_discogs(label)
-            releases = Release.objects.all()
-    return render(request, 'releases.html', {'formulario': formulario, 'releases': releases, 'STATIC_URL': settings.STATIC_URL})
+            releases = ReleasesDiscogs.objects.all()
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+
+
+def show_releases_discogs(request):
+    formulario = byLabel()
+    fecha = 0
+    releases = []
+    page_type = "discogs"
+    releases = ReleasesDiscogs.objects.all()
+    return render(request, 'index.html', {'releases': releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+
+
+def show_releases_beatport(request):
+    formulario = byLabel()
+    fecha = 0
+    releases = []
+    page_type = "beatport"
+    releases = ReleasesBeatport.objects.all()
+    return render(request, 'index.html', {'releases': releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+
+
+def show_releases_by_label_beatport(request):
+    formulario = byLabel()
+    fecha = 0
+    releases = []
+    page_type = "beatport"
+    if request.method == 'POST':
+        formulario = byLabel(request.POST)
+        if formulario.is_valid():
+            releasesList = ReleasesBeatport.objects.all()
+            label = formulario.cleaned_data['label']
+            populate_releases_by_label_beatport(label)
+            releases = ReleasesBeatport.objects.all()
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
 
 
 def inicio(request):
-    return render(request, 'inicio.html')
+    return render(request, 'index.html')
 
 
 def ingresar(request):
