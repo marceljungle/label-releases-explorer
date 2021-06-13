@@ -7,7 +7,7 @@ from principal.models import ReleasesDiscogs, ReleasesBeatport
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from principal.forms import byLabel
+from principal.forms import byLabel, ReleasesByDate
 from principal.populate import populate_labels_by_discogs, populate_releases_by_label_beatport
 
 path = "data"
@@ -20,6 +20,7 @@ def show_releases_by_label_discogs(request):
     fecha = 0
     releases = []
     page_type = "discogs"
+    all_releases = "true"
     if request.method == 'POST':
         formulario = byLabel(request.POST)
         if formulario.is_valid():
@@ -27,7 +28,7 @@ def show_releases_by_label_discogs(request):
             label = formulario.cleaned_data['label']
             populate_labels_by_discogs(label)
             releases = ReleasesDiscogs.objects.all()
-    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
 
 
 def show_releases_discogs(request):
@@ -35,17 +36,19 @@ def show_releases_discogs(request):
     fecha = 0
     releases = []
     page_type = "discogs"
+    all_releases = "true"
     releases = ReleasesDiscogs.objects.all()
-    return render(request, 'index.html', {'releases': releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+    return render(request, 'index.html', {'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
 
 
 def show_releases_beatport(request):
     formulario = byLabel()
     fecha = 0
     releases = []
+    all_releases = "true"
     page_type = "beatport"
     releases = ReleasesBeatport.objects.all()
-    return render(request, 'index.html', {'releases': releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+    return render(request, 'index.html', {'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
 
 
 def show_releases_by_label_beatport(request):
@@ -53,6 +56,7 @@ def show_releases_by_label_beatport(request):
     fecha = 0
     releases = []
     page_type = "beatport"
+    all_releases = "true"
     if request.method == 'POST':
         formulario = byLabel(request.POST)
         if formulario.is_valid():
@@ -60,7 +64,35 @@ def show_releases_by_label_beatport(request):
             label = formulario.cleaned_data['label']
             populate_releases_by_label_beatport(label)
             releases = ReleasesBeatport.objects.all()
-    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+
+
+def filter_by_date_beatport(request):
+    formulario = ReleasesByDate()
+    date = 0
+    releases = []
+    page_type = "beatport"
+    all_releases = "false"
+    if request.method == 'POST':
+        formulario = ReleasesByDate(request.POST)
+        if formulario.is_valid():
+            date = formulario.cleaned_data['date']
+            releases = ReleasesBeatport.objects.filter(year__istartswith=date)
+    return render(request, 'index.html', {'formulario': formulario, 'page_type': page_type, 'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_date_discogs(request):
+    formulario = ReleasesByDate()
+    date = 0
+    releases = []
+    page_type = "discogs"
+    all_releases = "false"
+    if request.method == 'POST':
+        formulario = ReleasesByDate(request.POST)
+        if formulario.is_valid():
+            date = formulario.cleaned_data['date']
+            releases = ReleasesDiscogs.objects.filter(year__istartswith=date)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
 def inicio(request):
