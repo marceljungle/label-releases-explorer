@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>label-releases-explorer</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/main_style.css' %}">
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<body>
+{% if formulario %}
+ <form class="center" id="formulario" method="post" action=''>{% csrf_token %}
+    {{formulario}}
+    <input type='submit' value='Search' class="button"/>
+</form>
+{% endif %}
+
+        <div class="main-container">
+            <!-- HEADER -->
+            <header class="block">
+                <ul class="header-menu horizontal-list">
+                    <li>
+                        <a class="header-menu-tab" href="/"><span class="icon entypo-cog scnd-font-color"></span>Home</a>
+                    </li>
+                    <li>
+                        <a class="header-menu-tab" href="/releasesdiscogs"><span class="icon fontawesome-user scnd-font-color"></span>Discogs</a>
+                    </li>
+                    <li>
+                        <a class="header-menu-tab" href="/releasesbeatport"><span class="icon fontawesome-envelope scnd-font-color"></span>Beatport</a>
+                    </li>
+                    <li>
+                        <a class="header-menu-tab" href="/releasesjuno"><span class="icon fontawesome-envelope scnd-font-color"></span>Juno</a>
+                    </li>
+                </ul>
+            </header>
+
+            <!-- LEFT-CONTAINER -->
+
+            {% if page_type == "discogs" %}
+            {% include 'discogs_left_container.html' %}
+            {% endif %}
+
+            {% if page_type == "beatport" %}
+            {% include 'beatport_left_container.html' %}
+            {% endif %}
+
+            {% if page_type == "juno" %}
+            {% include 'juno_left_container.html' %}
+            {% endif %}
+
+            <!-- MIDDLE-CONTAINER -->
+            <div class="middle-container container-main">
+                <div class="profile block"> <!-- PROFILE (MIDDLE-CONTAINER) -->
+                    {% if releases %}
+                    {% if all_releases == "true" %}
+                    <h1 class="only-center"> Total label releases:  {{ releases|length }}</h1>
+                    {% elif all_releases == "false" %}
+                    <h1 class="only-center"> Filtered releases:  {{ releases|length }}</h1>
+                    {% endif %}
+                    <ul>
+                    {% for row in releases %}
+                        <li class="custom font-awesome">
+                            <img src="{{row.image}}">
+                            <h1>{{row.artist}}</h1>
+                            <h2>{{row.title}}</h2>
+                            {% if page_type == "discogs" %}
+                            <p>Catalog Nº: {{row.catalog_number}}</p>
+                            {% elif page_type == "beatport" %}
+                            <p>Catalog Nº: <a href="{{row.catalog_number}}">Catalog</a></p>
+                            {% elif page_type == "juno" %}
+                            <p>Catalog Nº: {{row.catalog_number}}</p>
+                            {% endif %}
+                            <p>Date: {{row.year}}</p>
+                        </li>    
+                    {% endfor %}
+		            {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div> <!-- end main-container -->
+    </body>
+<!-- partial -->
+  
+</body>
+</html>
