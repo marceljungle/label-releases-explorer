@@ -1,21 +1,22 @@
+{% load static %}
 <div class="left-container container">
     <div class="menu-box block"> <!-- MENU BOX (LEFT-CONTAINER) -->
         <h2 class="titular">MENU | Beatport</h2>
         <ul class="menu-box-menu">
             <li>
-                <a class="menu-box-tab" href="/releasesbylabelbeatport"><span class="icon entypo-cog scnd-font-color"></span>Get releases</a>
+                <a class="menu-box-tab" href="/releasesbylabelbeatport"><img src="{% static 'img/download.png' %}" width="45" height="40" style="margin-top:15px; margin-left:15px">Get releases</a>
             </li>
             <li>
-                <a class="menu-box-tab" href="/releasesbeatport"><span class="icon fontawesome-envelope scnd-font-color"></span>All releases</a>                            
+                <a class="menu-box-tab" href="/releasesbeatport"><img src="{% static 'img/music_library.png' %}" width="45" height="40" style="margin-top:10px; margin-bottom:5px; margin-left:15px">All releases</a>                            
             </li>
             <li>
-                <a class="menu-box-tab" href="/filterbydatebeatport"><span class="icon entypo-paper-plane scnd-font-color"></span>Filter by date</a>                            
+                <a class="menu-box-tab" href="/filterbydatebeatport"><img src="{% static 'img/date.png' %}" width="37" height="33" style="margin-top:15px; margin-left:20px; margin-right:18px">Filter by date</a>                            
             </li>
             <li>
-                <a class="menu-box-tab" href="#10"><span class="icon entypo-calendar scnd-font-color"></span>Filter by artist</a>                            
+                <a class="menu-box-tab" href="#10"><img src="{% static 'img/artist.png' %}" width="37" height="33" style="margin-top:15px; margin-left:20px; margin-right:18px">Filter by artist</a>                            
             </li>
             <li>
-                <a class="menu-box-tab" href="#12"><span class="icon entypo-cog scnd-font-color"></span>Filter by album name</a>
+                <a class="menu-box-tab" href="#12"><img src="{% static 'img/album.png' %}" width="45" height="45" style="margin-top:10px; margin-left:20px; margin-right:10px">Filter by album name</a>
             </li>                       
         </ul>
     </div>
