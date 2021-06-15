@@ -29,6 +29,9 @@
                     <li>
                         <a class="header-menu-tab" href="/releasesbeatport"><span class="icon fontawesome-envelope scnd-font-color"></span>Beatport</a>
                     </li>
+                    <li>
+                        <a class="header-menu-tab" href="/releasesjuno"><span class="icon fontawesome-envelope scnd-font-color"></span>Juno</a>
+                    </li>
                 </ul>
             </header>
 
@@ -40,6 +43,10 @@
 
             {% if page_type == "beatport" %}
             {% include 'beatport_left_container.html' %}
+            {% endif %}
+
+            {% if page_type == "juno" %}
+            {% include 'juno_left_container.html' %}
             {% endif %}
 
             <!-- MIDDLE-CONTAINER -->
@@ -59,8 +66,10 @@
                             <h2>{{row.title}}</h2>
                             {% if page_type == "discogs" %}
                             <p>Catalog Nº: {{row.catalog_number}}</p>
-                            {% else %}
+                            {% elif page_type == "beatport" %}
                             <p>Catalog Nº: <a href="{{row.catalog_number}}">Catalog</a></p>
+                            {% elif page_type == "juno" %}
+                            <p>Catalog Nº: {{row.catalog_number}}</p>
                             {% endif %}
                             <p>Date: {{row.year}}</p>
                         </li>    

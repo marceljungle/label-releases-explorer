@@ -26,9 +26,11 @@ urlpatterns = [
     path('inicio/', views.inicio),
     path('releasesbylabelbeatport/', views.show_releases_by_label_beatport),
     path('releasesbylabeldiscogs/', views.show_releases_by_label_discogs),
+    path('releasesbylabeljuno/', views.show_releases_by_label_juno),
     path('releasesdiscogs/', views.show_releases_discogs),
     path('releasesbeatport/', views.show_releases_beatport),
+    path('releasesjuno/', views.show_releases_juno),
     path('filterbydatebeatport/', views.filter_by_date_beatport),
     path('filterbydatediscogs/', views.filter_by_date_discogs),
-
+    path('filterbydatejuno/', views.filter_by_date_juno),
 ]
