@@ -5,13 +5,14 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 import requests
 from bs4 import BeautifulSoup
-import urllib.request
 import concurrent.futures
 from datetime import datetime
 import re
 import json
 import os
 
+ARL = "f7bf81223f117d96a012d7fd7c7b3090932438264ac5b8f82aa7d17f975560969c64b437f50d03b6b2005d026f8e76138d556874e2423c6a5c06cbd854c790e53b056317baa8c47857b2442e0763e6f7dfa143209f6b61ff60c10cc14aa22747"
+DOWNLOAD_DIR = "E:/Audio/"
 path = "data"
 userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
 headers = {
@@ -20,9 +21,9 @@ headers = {
 BASE_URL_DISCOGS = "https://www.discogs.com"
 BASE_URL_BEATPORT = "https://www.beatport.com"
 BASE_URL_JUNO = "https://www.junodownload.com"
+
+
 # Funcion de acceso restringido que carga los datos en la BD
-
-
 @login_required(login_url='/ingresar')
 def populateDatabase(request):
     populate_labels_by_discogs()
@@ -184,7 +185,7 @@ def discogs_iterate_releases(release):
 
 def get_deezer_album_url(album_and_artist):
     url = "https://www.deezer.com/search/" + \
-        album_and_artist.replace(
+        album_and_artist.replace("(Mix)", "").replace(
             "(Extended Re-Edit)", "").replace("(Extended Mixes)", "").replace("(Extended Mix)", "").replace("Extended Mix", "").replace("Extended Remix", "").replace(" ", "%20").replace("(", "").replace(")", "").replace("&", "")
     print(url)
     f = requests.get(url, headers=headers).content
@@ -195,5 +196,6 @@ def get_deezer_album_url(album_and_artist):
         "window.__DZR_APP_STATE__ = ", ""))
     albumId = site_json['ALBUM']["data"][0]["ALB_ID"]
     finalUrl = "https://www.deezer.com/en/album/" + str(albumId)
-    os.system("deemix -b flac -p" + 'E:/Audio/' +
-              datetime.today().strftime("%d-%m-%Y") + " " + finalUrl)
+    p = os.popen("deemix -b flac -p" + DOWNLOAD_DIR +
+                 datetime.today().strftime("%d-%m-%Y") + " " + finalUrl, "w")
+    p.write(ARL + "\n")
