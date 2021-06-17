@@ -9,6 +9,8 @@ import urllib.request
 import concurrent.futures
 from datetime import datetime
 import re
+import json
+import os
 
 path = "data"
 userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
@@ -178,3 +180,20 @@ def discogs_iterate_releases(release):
     # Scrapping section END
     ReleasesDiscogs.objects.create(artist=str(artist), catalog_number=str(
         catalog_number), title=str(title), year=str(year), image=str(image))
+
+
+def get_deezer_album_url(album_and_artist):
+    url = "https://www.deezer.com/search/" + \
+        album_and_artist.replace(
+            "(Extended Re-Edit)", "").replace("(Extended Mixes)", "").replace("(Extended Mix)", "").replace("Extended Mix", "").replace("Extended Remix", "").replace(" ", "%20").replace("(", "").replace(")", "").replace("&", "")
+    print(url)
+    f = requests.get(url, headers=headers).content
+    soup = BeautifulSoup(f, "html.parser")
+    res = soup.find("div", class_="hidden").find(
+        "script",)
+    site_json = json.loads(res.contents[0].replace(
+        "window.__DZR_APP_STATE__ = ", ""))
+    albumId = site_json['ALBUM']["data"][0]["ALB_ID"]
+    finalUrl = "https://www.deezer.com/en/album/" + str(albumId)
+    os.system("deemix -b flac -p" + 'E:/Audio/' +
+              datetime.today().strftime("%d-%m-%Y") + " " + finalUrl)
