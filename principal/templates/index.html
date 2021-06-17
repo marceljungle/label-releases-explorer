@@ -10,9 +10,11 @@
 <!-- partial:index.partial.html -->
 <body>
 {% if formulario %}
- <form class="center" id="formulario" method="post" action=''>{% csrf_token %}
+ <form  class="center" id="formulario" method="post" action=''>{% csrf_token %}
+    <div style="margin-left:100px">
     {{formulario}}
-    <input type='submit' value='Search' class="button"/>
+     </div>
+     <input type='submit' value='Search' class="button"/>
 </form>
 {% endif %}
 
@@ -72,7 +74,11 @@
                             <p>Catalog Nº: {{row.catalog_number}}</p>
                             {% endif %}
                             <p>Date: {{row.year}}</p>
-                        </li>    
+                             <form  style="center" id="downloadForm" method="post">{% csrf_token %}
+                                <input type="hidden" name="albumId" value="{{row.id}}">
+                                <input type='submit' value='Download' class="button"/>
+                            </form>
+                        </li>
                     {% endfor %}
 		            {% endif %}
                     </ul>

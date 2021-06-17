@@ -8,7 +8,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from principal.forms import byLabel, ReleasesByDate
-from principal.populate import populate_labels_by_discogs, populate_releases_by_label_beatport, populate_labels_by_juno
+from principal.populate import populate_labels_by_discogs, populate_releases_by_label_beatport, populate_labels_by_juno, get_deezer_album_url
+import re
 
 path = "data"
 
@@ -31,7 +32,6 @@ def show_releases_by_label_discogs(request):
 
 
 def show_releases_discogs(request):
-    formulario = byLabel()
     fecha = 0
     releases = []
     page_type = "discogs"
@@ -51,12 +51,25 @@ def show_releases_beatport(request):
 
 
 def show_releases_juno(request):
-    formulario = byLabel()
-    fecha = 0
     releases = []
     all_releases = "true"
     page_type = "juno"
     releases = ReleasesJuno.objects.all()
+    if request.method == 'POST':
+        album_id = request.POST.get('albumId', '')
+        album = ReleasesJuno.objects.filter(id=album_id)[0]
+        artist = album.artist
+        title = album.title
+        if "feat" in album.artist:
+            artist = re.findall(r"([\w\d\D\W]*)feat([\w\d\W]*)", album.artist)
+            print(artist)
+            artist = str(artist[0][0]) + " " + str(artist[0][1])
+        if "/" in album.artist:
+            artist = re.findall(r"([\w\d\s]*)/", album.artist)[0]
+        if "&" in album.title:
+            title = re.findall(r"([\w\d\s\S]*)&", album.title)[0]
+        album_and_artist = str(artist) + " " + str(title)
+        get_deezer_album_url(album_and_artist)
     return render(request, 'index.html', {'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
 
 
