@@ -3,18 +3,38 @@ from django.db.models import Avg, Count
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from datetime import datetime
-from principal.models import ReleasesDiscogs, ReleasesBeatport, ReleasesJuno
+from principal.models import ReleasesDiscogs, ReleasesBeatport, ReleasesJuno, AllReleases
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from principal.forms import byLabel, ReleasesByDate, ReleaseByArtist, ReleaseByAlbum
-from principal.populate import populate_labels_by_discogs, populate_releases_by_label_beatport, populate_labels_by_juno, get_deezer_album_url
+from principal.populate import populate_releases_by_label_discogs, populate_releases_by_label_beatport, populate_releases_by_label_juno, get_deezer_album_url
 import re
 
 path = "data"
 
 # Create your views here.
+
+
+def show_releases_by_label_all(request):
+    formulario = byLabel()
+    fecha = 0
+    releases = []
+    page_type = "all"
+    all_releases = "true"
+    if request.method == 'POST':
+        formulario = byLabel(request.POST)
+        if formulario.is_valid():
+            label = formulario.cleaned_data['label']
+            AllReleases.objects.all().delete()
+            populate_releases_by_label_beatport(label, True)
+            populate_releases_by_label_discogs(label, True)
+            populate_releases_by_label_juno(label, True)
+            releases = AllReleases.objects.all()
+            response = redirect('/releasesall')
+            return response
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
 
 
 def show_releases_by_label_discogs(request):
@@ -27,11 +47,25 @@ def show_releases_by_label_discogs(request):
         formulario = byLabel(request.POST)
         if formulario.is_valid():
             label = formulario.cleaned_data['label']
-            populate_labels_by_discogs(label)
+            populate_releases_by_label_discogs(label)
             releases = ReleasesDiscogs.objects.all()
             response = redirect('/releasesdiscogs')
             return response
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+
+
+def filter_album_and_artist(album):
+    artist = album.artist
+    title = album.title
+    if "feat" in album.artist:
+        artist = re.findall(r"([\w\d\D\W]*)feat([\w\d\W]*)", album.artist)
+        print(artist)
+        artist = str(artist[0][0]) + " " + str(artist[0][1])
+    if "/" in album.artist:
+        artist = re.findall(r"([\w\d\s]*)/", album.artist)[0]
+    if " & " in album.title:
+        title = re.findall(r"([\w\d\s\S]*)&", album.title)[0]
+    return artist, title
 
 
 def show_releases_discogs(request):
@@ -43,16 +77,7 @@ def show_releases_discogs(request):
     if request.method == 'POST':
         album_id = request.POST.get('albumId', '')
         album = ReleasesDiscogs.objects.filter(id=album_id)[0]
-        artist = album.artist
-        title = album.title
-        if "feat" in album.artist:
-            artist = re.findall(r"([\w\d\D\W]*)feat([\w\d\W]*)", album.artist)
-            print(artist)
-            artist = str(artist[0][0]) + " " + str(artist[0][1])
-        if "/" in album.artist:
-            artist = re.findall(r"([\w\d\s]*)/", album.artist)[0]
-        if "&" in album.title:
-            title = re.findall(r"([\w\d\s\S]*)&", album.title)[0]
+        artist, title = filter_album_and_artist(album)
         album_and_artist = str(artist) + " " + str(title)
         get_deezer_album_url(album_and_artist)
     return render(request, 'index.html', {'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
@@ -68,16 +93,7 @@ def show_releases_beatport(request):
     if request.method == 'POST':
         album_id = request.POST.get('albumId', '')
         album = ReleasesBeatport.objects.filter(id=album_id)[0]
-        artist = album.artist
-        title = album.title
-        if "feat" in album.artist:
-            artist = re.findall(r"([\w\d\D\W]*)feat([\w\d\W]*)", album.artist)
-            print(artist)
-            artist = str(artist[0][0]) + " " + str(artist[0][1])
-        if "/" in album.artist:
-            artist = re.findall(r"([\w\d\s]*)/", album.artist)[0]
-        if "&" in album.title:
-            title = re.findall(r"([\w\d\s\S]*)&", album.title)[0]
+        artist, title = filter_album_and_artist(album)
         album_and_artist = str(artist) + " " + str(title)
         get_deezer_album_url(album_and_artist)
     return render(request, 'index.html', {'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
@@ -91,16 +107,21 @@ def show_releases_juno(request):
     if request.method == 'POST':
         album_id = request.POST.get('albumId', '')
         album = ReleasesJuno.objects.filter(id=album_id)[0]
-        artist = album.artist
-        title = album.title
-        if "feat" in album.artist:
-            artist = re.findall(r"([\w\d\D\W]*)feat([\w\d\W]*)", album.artist)
-            print(artist)
-            artist = str(artist[0][0]) + " " + str(artist[0][1])
-        if "/" in album.artist:
-            artist = re.findall(r"([\w\d\s]*)/", album.artist)[0]
-        if "&" in album.title:
-            title = re.findall(r"([\w\d\s\S]*)&", album.title)[0]
+        artist, title = filter_album_and_artist(album)
+        album_and_artist = str(artist) + " " + str(title)
+        get_deezer_album_url(album_and_artist)
+    return render(request, 'index.html', {'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
+
+
+def show_releases_all(request):
+    releases = []
+    all_releases = "true"
+    page_type = "all"
+    releases = AllReleases.objects.all()
+    if request.method == 'POST':
+        album_id = request.POST.get('albumId', '')
+        album = AllReleases.objects.filter(id=album_id)[0]
+        artist, title = filter_album_and_artist(album)
         album_and_artist = str(artist) + " " + str(title)
         get_deezer_album_url(album_and_artist)
     return render(request, 'index.html', {'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL, 'page_type': page_type})
@@ -133,7 +154,7 @@ def show_releases_by_label_juno(request):
         formulario = byLabel(request.POST)
         if formulario.is_valid():
             label = formulario.cleaned_data['label']
-            populate_labels_by_juno(label)
+            populate_releases_by_label_juno(label)
             releases = ReleasesJuno.objects.all()
             response = redirect('/releasesjuno')
             return response
@@ -147,10 +168,32 @@ def filter_by_date_beatport(request):
     page_type = "beatport"
     all_releases = "false"
     if request.method == 'POST':
+        try:
+            album_id = request.POST.get('albumId', '')
+            album = ReleasesBeatport.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleasesByDate(request.POST)
+            if formulario.is_valid():
+                date = formulario.cleaned_data['date']
+                releases = ReleasesBeatport.objects.filter(
+                    year__istartswith=date)
+    return render(request, 'index.html', {'formulario': formulario, 'page_type': page_type, 'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_date_all(request):
+    formulario = ReleasesByDate()
+    date = 0
+    releases = []
+    page_type = "all"
+    all_releases = "false"
+    if request.method == 'POST':
         formulario = ReleasesByDate(request.POST)
         if formulario.is_valid():
             date = formulario.cleaned_data['date']
-            releases = ReleasesBeatport.objects.filter(year__istartswith=date)
+            releases = AllReleases.objects.filter(year__istartswith=date)
     return render(request, 'index.html', {'formulario': formulario, 'page_type': page_type, 'releases': releases, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
@@ -161,10 +204,18 @@ def filter_by_date_discogs(request):
     page_type = "discogs"
     all_releases = "false"
     if request.method == 'POST':
-        formulario = ReleasesByDate(request.POST)
-        if formulario.is_valid():
-            date = formulario.cleaned_data['date']
-            releases = ReleasesDiscogs.objects.filter(year__istartswith=date)
+        try:
+            album_id = request.POST.get('albumId', '')
+            album = ReleasesDiscogs.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleasesByDate(request.POST)
+            if formulario.is_valid():
+                date = formulario.cleaned_data['date']
+                releases = ReleasesDiscogs.objects.filter(
+                    year__istartswith=date)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
@@ -175,10 +226,17 @@ def filter_by_date_juno(request):
     page_type = "juno"
     all_releases = "false"
     if request.method == 'POST':
-        formulario = ReleasesByDate(request.POST)
-        if formulario.is_valid():
-            date = formulario.cleaned_data['date']
-            releases = ReleasesJuno.objects.filter(year__istartswith=date)
+        try:
+            album_id = request.POST.get('albumId', '')
+            album = ReleasesJuno.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleasesByDate(request.POST)
+            if formulario.is_valid():
+                date = formulario.cleaned_data['date']
+                releases = ReleasesJuno.objects.filter(year__istartswith=date)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
@@ -189,10 +247,39 @@ def filter_by_artist_beatport(request):
     page_type = "beatport"
     all_releases = "false"
     if request.method == 'POST':
-        formulario = ReleaseByArtist(request.POST)
-        if formulario.is_valid():
-            artist = formulario.cleaned_data['artist']
-            releases = ReleasesBeatport.objects.filter(artist__contains=artist)
+        try:
+            album_id = request.POST.get('albumId', '')
+            album = ReleasesBeatport.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleaseByArtist(request.POST)
+            if formulario.is_valid():
+                artist = formulario.cleaned_data['artist']
+                releases = ReleasesBeatport.objects.filter(
+                    artist__contains=artist)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_artist_all(request):
+    formulario = ReleaseByArtist()
+    artist = ""
+    releases = []
+    page_type = "all"
+    all_releases = "false"
+    if request.method == 'POST':
+        try:
+            album_id = request.POST.get('albumId', '')
+            album = AllReleases.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleaseByArtist(request.POST)
+            if formulario.is_valid():
+                artist = formulario.cleaned_data['artist']
+                releases = AllReleases.objects.filter(artist__contains=artist)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
@@ -203,10 +290,19 @@ def filter_by_artist_discogs(request):
     page_type = "discogs"
     all_releases = "false"
     if request.method == 'POST':
-        formulario = ReleaseByArtist(request.POST)
-        if formulario.is_valid():
-            artist = formulario.cleaned_data['artist']
-            releases = ReleasesDiscogs.objects.filter(artist__contains=artist)
+        try:
+            album_id = request.POST.get('albumId', '')
+            print(album_id)
+            album = ReleasesDiscogs.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleaseByArtist(request.POST)
+            if formulario.is_valid():
+                artist = formulario.cleaned_data['artist']
+                releases = ReleasesDiscogs.objects.filter(
+                    artist__contains=artist)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
@@ -217,10 +313,18 @@ def filter_by_artist_juno(request):
     page_type = "juno"
     all_releases = "false"
     if request.method == 'POST':
-        formulario = ReleaseByArtist(request.POST)
-        if formulario.is_valid():
-            artist = formulario.cleaned_data['artist']
-            releases = ReleasesJuno.objects.filter(artist__contains=artist)
+        try:
+            album_id = request.POST.get('albumId', '')
+            print(album_id)
+            album = ReleasesJuno.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleaseByArtist(request.POST)
+            if formulario.is_valid():
+                artist = formulario.cleaned_data['artist']
+                releases = ReleasesJuno.objects.filter(artist__contains=artist)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
@@ -231,10 +335,18 @@ def filter_by_album_juno(request):
     page_type = "juno"
     all_releases = "false"
     if request.method == 'POST':
-        formulario = ReleaseByAlbum(request.POST)
-        if formulario.is_valid():
-            album = formulario.cleaned_data['album']
-            releases = ReleasesJuno.objects.filter(title__contains=album)
+        try:
+            album_id = request.POST.get('albumId', '')
+            print(album_id)
+            album = ReleasesJuno.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleaseByAlbum(request.POST)
+            if formulario.is_valid():
+                album = formulario.cleaned_data['album']
+                releases = ReleasesJuno.objects.filter(title__contains=album)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
@@ -245,10 +357,19 @@ def filter_by_album_beatport(request):
     page_type = "beatport"
     all_releases = "false"
     if request.method == 'POST':
-        formulario = ReleaseByAlbum(request.POST)
-        if formulario.is_valid():
-            album = formulario.cleaned_data['album']
-            releases = ReleasesBeatport.objects.filter(title__contains=album)
+        try:
+            album_id = request.POST.get('albumId', '')
+            print(album_id)
+            album = ReleasesBeatport.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleaseByAlbum(request.POST)
+            if formulario.is_valid():
+                album = formulario.cleaned_data['album']
+                releases = ReleasesBeatport.objects.filter(
+                    title__contains=album)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 
@@ -259,10 +380,41 @@ def filter_by_album_discogs(request):
     page_type = "discogs"
     all_releases = "false"
     if request.method == 'POST':
-        formulario = ReleaseByAlbum(request.POST)
-        if formulario.is_valid():
-            album = formulario.cleaned_data['album']
-            releases = ReleasesDiscogs.objects.filter(title__contains=album)
+        try:
+            album_id = request.POST.get('albumId', '')
+            print(album_id)
+            album = ReleasesDiscogs.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleaseByAlbum(request.POST)
+            if formulario.is_valid():
+                album = formulario.cleaned_data['album']
+                releases = ReleasesDiscogs.objects.filter(
+                    title__contains=album)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_album_all(request):
+    formulario = ReleaseByAlbum()
+    album = ""
+    releases = []
+    page_type = "all"
+    all_releases = "false"
+    if request.method == 'POST':
+        try:
+            album_id = request.POST.get('albumId', '')
+            print(album_id)
+            album = AllReleases.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        except:
+            formulario = ReleaseByAlbum(request.POST)
+            if formulario.is_valid():
+                album = formulario.cleaned_data['album']
+                releases = AllReleases.objects.filter(title__contains=album)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 

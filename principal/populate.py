@@ -1,5 +1,5 @@
 from django.http.response import HttpResponseRedirect, HttpResponse
-from principal.models import ReleasesDiscogs, ReleasesBeatport, ReleasesJuno
+from principal.models import ReleasesDiscogs, ReleasesBeatport, ReleasesJuno, AllReleases
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -26,16 +26,17 @@ BASE_URL_JUNO = "https://www.junodownload.com"
 # Funcion de acceso restringido que carga los datos en la BD
 @login_required(login_url='/ingresar')
 def populateDatabase(request):
-    populate_labels_by_discogs()
+    populate_releases_by_label_discogs()
 
     # se hace logout para obligar a login cada vez que se vaya a poblar la BD
     logout(request)
     return HttpResponseRedirect('/inicio')
 
 
-def populate_labels_by_discogs(label_name):
+def populate_releases_by_label_discogs(label_name, allServices):
     print("Loading discogs label releases...")
-    ReleasesDiscogs.objects.all().delete()
+    if allServices != True:
+        ReleasesDiscogs.objects.all().delete()
 
     # Scrapping section START
     url = "https://www.discogs.com/search/?q=" + \
@@ -62,14 +63,16 @@ def populate_labels_by_discogs(label_name):
         releases_list = list()
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             future_to_url = {executor.submit(
-                discogs_iterate_releases, release): release for release in list_of_releases}
+                discogs_iterate_releases, release, allServices): release for release in list_of_releases}
+    if allServices != True:
+        print("Discogs releases inserted: " +
+              str(ReleasesDiscogs.objects.count()))
+        print("-------------------------------------------------")
 
-    print("Discogs releases inserted: " + str(ReleasesDiscogs.objects.count()))
-    print("-------------------------------------------------")
 
-
-def populate_releases_by_label_beatport(label_name):
-    ReleasesBeatport.objects.all().delete()
+def populate_releases_by_label_beatport(label_name, allServices):
+    if allServices != True:
+        ReleasesBeatport.objects.all().delete()
     print("Loading beatport label releases...")
     url = "https://www.beatport.com/search/labels?q=" + \
         label_name.replace(" ", "+")
@@ -97,16 +100,17 @@ def populate_releases_by_label_beatport(label_name):
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             future_to_url = {executor.submit(
-                beatport_iterate_releases, release): release for release in list_of_releases}
+                beatport_iterate_releases, release, allServices): release for release in list_of_releases}
+    if allServices != True:
+        print("Beatport releases inserted: " +
+              str(ReleasesBeatport.objects.count()))
+        print("-------------------------------------------------")
 
-    print("Beatport releases inserted: " +
-          str(ReleasesBeatport.objects.count()))
-    print("-------------------------------------------------")
 
-
-def populate_labels_by_juno(label_name):
+def populate_releases_by_label_juno(label_name, allServices):
     print("Loading juno label releases...")
-    ReleasesJuno.objects.all().delete()
+    if allServices != True:
+        ReleasesJuno.objects.all().delete()
 
     # Scrapping section START
     url = "https://www.junodownload.com/search/?q%5Ball%5D%5B%5D=" + \
@@ -133,13 +137,14 @@ def populate_labels_by_juno(label_name):
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             future_to_url = {executor.submit(
-                juno_iterate_releases, release): release for release in list_of_releases}
+                juno_iterate_releases, release, allServices): release for release in list_of_releases}
 
-    print("Juno releases inserted: " + str(ReleasesJuno.objects.count()))
-    print("-------------------------------------------------")
+    if allServices != True:
+        print("Juno releases inserted: " + str(ReleasesJuno.objects.count()))
+        print("-------------------------------------------------")
 
 
-def juno_iterate_releases(release):
+def juno_iterate_releases(release, allServices):
     artist = release.find("div", class_="juno-artist").text.strip()
     cat_date = release.find(
         "div", class_="mb-lg-4").find_all("br")
@@ -150,11 +155,15 @@ def juno_iterate_releases(release):
     image = str()
     image = re.findall(r"(https.*.jpg)", str(release.find(
         "img")))[0]
-    ReleasesJuno.objects.create(artist=str(artist), catalog_number=str(
-        catalog_number), title=str(title), year=str(year), image=str(image))
+    if allServices == True:
+        AllReleases.objects.create(artist=str(artist), catalog_number=str(
+            catalog_number), title=str(title), year=str(year), image=str(image))
+    else:
+        ReleasesJuno.objects.create(artist=str(artist), catalog_number=str(
+            catalog_number), title=str(title), year=str(year), image=str(image))
 
 
-def beatport_iterate_releases(release):
+def beatport_iterate_releases(release, allServices):
     artist = ", ".join(word.strip() for word in release.find(
         "p", class_="buk-horz-release-artists").text.strip().split(","))
     # Get catalog number START
@@ -168,11 +177,15 @@ def beatport_iterate_releases(release):
     image = str()
     image = release.find(
         "img", class_="horz-release-artwork")["data-src"]
-    ReleasesBeatport.objects.create(artist=str(artist), catalog_number=str(
-        album_url), title=str(title), year=str(year), image=str(image))
+    if allServices == True:
+        AllReleases.objects.create(artist=str(artist), catalog_number=str(
+            album_url), title=str(title), year=str(year), image=str(image))
+    else:
+        ReleasesBeatport.objects.create(artist=str(artist), catalog_number=str(
+            album_url), title=str(title), year=str(year), image=str(image))
 
 
-def discogs_iterate_releases(release):
+def discogs_iterate_releases(release, allServices):
     artist = release.find("td", class_="artist").text.strip()
     catalog_number = release.find(
         "td", class_="catno_first").text.strip()
@@ -185,8 +198,12 @@ def discogs_iterate_releases(release):
     except:
         image = "http://hosted.netro.ca/morplay/player/img/blankart.jpg"
     # Scrapping section END
-    ReleasesDiscogs.objects.create(artist=str(artist), catalog_number=str(
-        catalog_number), title=str(title), year=str(year), image=str(image))
+    if allServices == True:
+        AllReleases.objects.create(artist=str(artist), catalog_number=str(
+            catalog_number), title=str(title), year=str(year), image=str(image))
+    else:
+        ReleasesDiscogs.objects.create(artist=str(artist), catalog_number=str(
+            catalog_number), title=str(title), year=str(year), image=str(image))
 
 
 def get_deezer_album_url(album_and_artist):

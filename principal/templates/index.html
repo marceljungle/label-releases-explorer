@@ -23,16 +23,19 @@
             <header class="block">
                 <ul class="header-menu horizontal-list">
                     <li>
-                        <a class="header-menu-tab" href="/" style="font-size: 30px"><img src="{% static 'img/home.png' %}" width="45" height="40" style="margin-top:17px"></span>Home</a>
+                        <a class="header-menu-tab" href="/" style="font-size: 20px"><img src="{% static 'img/home.png' %}" width="40" height="35" style="margin-top:17px"></span>Home</a>
                     </li>
                     <li>
-                        <a class="header-menu-tab" href="/releasesdiscogs" style="font-size: 30px"><img src="{% static 'img/discogs.png' %}" width="150" height="37" style="margin-top:20px"></span>Discogs</a>
+                        <a class="header-menu-tab" href="/releasesdiscogs" style="font-size: 20px"><img src="{% static 'img/discogs.png' %}" width="130" height="35" style="margin-top:20px"></span>Discogs</a>
                     </li>
                     <li>
-                        <a class="header-menu-tab" href="/releasesbeatport" style="font-size: 30px"><img src="{% static 'img/beatport.png' %}" width="70" height="70" style="margin-top:4px"></span>Beatport</a>
+                        <a class="header-menu-tab" href="/releasesbeatport" style="font-size: 20px"><img src="{% static 'img/beatport.png' %}" width="70" height="70" style="margin-top:4px"></span>Beatport</a>
                     </li>
                     <li>
-                        <a class="header-menu-tab" href="/releasesjuno" style="font-size: 30px"><img src="{% static 'img/juno.png' %}" width="165" height="35" style="margin-top:20px"></span>Juno</a>
+                        <a class="header-menu-tab" href="/releasesjuno" style="font-size: 20px"><img src="{% static 'img/juno.png' %}" width="155" height="33" style="margin-top:23px"></span>Juno</a>
+                    </li>
+                    <li>
+                        <a class="header-menu-tab" href="/releasesall" style="font-size: 20px"><img src="{% static 'img/all.png' %}" width="50" height="50" style="margin-top:15px"></span>All</a>
                     </li>
                 </ul>
             </header>
@@ -51,6 +54,10 @@
             {% include 'juno_left_container.html' %}
             {% endif %}
 
+            {% if page_type == "all" %}
+            {% include 'all_left_container.html' %}
+            {% endif %}
+
             <!-- MIDDLE-CONTAINER -->
             <div class="middle-container container-main">
                 <div class="profile block"> <!-- PROFILE (MIDDLE-CONTAINER) -->
@@ -63,14 +70,12 @@
                     <ul>
                     {% for row in releases %}
                         <li class="custom font-awesome">
-                            <img src="{{row.image}}">
+                            <img src="{{row.image}}" width="200" height="200">
                             <h1>{{row.artist}}</h1>
                             <h2>{{row.title}}</h2>
-                            {% if page_type == "discogs" %}
-                            <p>Catalog Nº: {{row.catalog_number}}</p>
-                            {% elif page_type == "beatport" %}
-                            <p>Catalog Nº: <a href="{{row.catalog_number}}">Catalog</a></p>
-                            {% elif page_type == "juno" %}
+                            {% if "http" in row.catalog_number %}
+                            <p>Catalog Nº: <a href="{{row.catalog_number}}">Catalog</a></p>                            
+                            {% else %}
                             <p>Catalog Nº: {{row.catalog_number}}</p>
                             {% endif %}
                             <p>Date: {{row.year}}</p>
