@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    """Run administrative tasks."""
+    """Run administrative tasks.."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE',
                           'label-releases-explorer.settings')
     try:

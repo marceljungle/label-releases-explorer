@@ -1,0 +1,23 @@
+{% load static %}
+<div class="left-container container">
+    <div class="menu-box block"> <!-- MENU BOX (LEFT-CONTAINER) -->
+        <h2 class="titular">MENU | All</h2>
+        <ul class="menu-box-menu">
+            <li>
+                <a class="menu-box-tab" href="/releasesbylabelall"><img src="{% static 'img/download.png' %}" width="45" height="40" style="margin-top:15px; margin-left:15px">Get releases</a>
+            </li>
+            <li>
+                <a class="menu-box-tab" href="/releasesall"><img src="{% static 'img/music_library.png' %}" width="45" height="40" style="margin-top:10px; margin-bottom:5px; margin-left:15px">All releases</a>                            
+            </li>
+            <li>
+                <a class="menu-box-tab" href="/filterbydateall"><img src="{% static 'img/date.png' %}" width="37" height="33" style="margin-top:15px; margin-left:20px; margin-right:18px">Filter by date</a>                            
+            </li>
+            <li>
+                <a class="menu-box-tab" href="/filterbyartistall"><img src="{% static 'img/artist.png' %}" width="37" height="33" style="margin-top:15px; margin-left:20px; margin-right:18px">Filter by artist</a>                            
+            </li>
+            <li>
+                <a class="menu-box-tab" href="/filterbyalbumall"><img src="{% static 'img/album.png' %}" width="45" height="45" style="margin-top:10px; margin-left:20px; margin-right:10px">Filter by album name</a>
+            </li>                       
+        </ul>
+    </div>
+</div>
