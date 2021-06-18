@@ -130,22 +130,28 @@ def populate_labels_by_juno(label_name):
         list_of_releases = releases_in_page_soup.find_all(
             "div", class_="jd-listing-item")
         releases_list = list()
-        for release in list_of_releases:
-            artist = release.find("div", class_="juno-artist").text.strip()
-            cat_date = release.find(
-                "div", class_="mb-lg-4").find_all("br")
-            catalog_number = cat_date[0].previous_sibling
-            title = release.find("a", class_="juno-title").text.strip()
-            year = str(datetime.strptime(
-                str(cat_date[0].next_sibling), '%d %b %y').date())
-            image = str()
-            image = re.findall(r"(https.*.jpg)", str(release.find(
-                "img")))[0]
-            ReleasesJuno.objects.create(artist=str(artist), catalog_number=str(
-                catalog_number), title=str(title), year=str(year), image=str(image))
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            future_to_url = {executor.submit(
+                juno_iterate_releases, release): release for release in list_of_releases}
 
     print("Juno releases inserted: " + str(ReleasesJuno.objects.count()))
     print("-------------------------------------------------")
+
+
+def juno_iterate_releases(release):
+    artist = release.find("div", class_="juno-artist").text.strip()
+    cat_date = release.find(
+        "div", class_="mb-lg-4").find_all("br")
+    catalog_number = cat_date[0].previous_sibling
+    title = release.find("a", class_="juno-title").text.strip()
+    year = str(datetime.strptime(
+        str(cat_date[0].next_sibling), '%d %b %y').date())
+    image = str()
+    image = re.findall(r"(https.*.jpg)", str(release.find(
+        "img")))[0]
+    ReleasesJuno.objects.create(artist=str(artist), catalog_number=str(
+        catalog_number), title=str(title), year=str(year), image=str(image))
 
 
 def beatport_iterate_releases(release):
