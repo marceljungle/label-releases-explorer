@@ -1,5 +1,9 @@
 # label-releases-explorer
 
+## Description
+Get all releases of a given label name, filter its albums and download them with a single click. This is using `deemix` package to download songs from deezer, so this is basically searching the name of the album that you clicked on using Deezer web page search and then it uses the album id to download that album with the `deemix` package.
+
+**Deemix** reddit: r/deemix/
 ## Steps to get it working
 1. Install dependencies, it needs to be done manually for now:
     * `python -m pip install django`
