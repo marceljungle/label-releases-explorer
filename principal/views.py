@@ -8,7 +8,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from principal.forms import byLabel, ReleasesByDate
+from principal.forms import byLabel, ReleasesByDate, ReleaseByArtist, ReleaseByAlbum
 from principal.populate import populate_labels_by_discogs, populate_releases_by_label_beatport, populate_labels_by_juno, get_deezer_album_url
 import re
 
@@ -172,13 +172,97 @@ def filter_by_date_juno(request):
     formulario = ReleasesByDate()
     date = 0
     releases = []
-    page_type = "discogs"
+    page_type = "juno"
     all_releases = "false"
     if request.method == 'POST':
         formulario = ReleasesByDate(request.POST)
         if formulario.is_valid():
             date = formulario.cleaned_data['date']
             releases = ReleasesJuno.objects.filter(year__istartswith=date)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_artist_beatport(request):
+    formulario = ReleaseByArtist()
+    artist = ""
+    releases = []
+    page_type = "beatport"
+    all_releases = "false"
+    if request.method == 'POST':
+        formulario = ReleaseByArtist(request.POST)
+        if formulario.is_valid():
+            artist = formulario.cleaned_data['artist']
+            releases = ReleasesBeatport.objects.filter(artist__contains=artist)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_artist_discogs(request):
+    formulario = ReleaseByArtist()
+    artist = ""
+    releases = []
+    page_type = "discogs"
+    all_releases = "false"
+    if request.method == 'POST':
+        formulario = ReleaseByArtist(request.POST)
+        if formulario.is_valid():
+            artist = formulario.cleaned_data['artist']
+            releases = ReleasesDiscogs.objects.filter(artist__contains=artist)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_artist_juno(request):
+    formulario = ReleaseByArtist()
+    artist = ""
+    releases = []
+    page_type = "juno"
+    all_releases = "false"
+    if request.method == 'POST':
+        formulario = ReleaseByArtist(request.POST)
+        if formulario.is_valid():
+            artist = formulario.cleaned_data['artist']
+            releases = ReleasesJuno.objects.filter(artist__contains=artist)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_album_juno(request):
+    formulario = ReleaseByAlbum()
+    album = ""
+    releases = []
+    page_type = "juno"
+    all_releases = "false"
+    if request.method == 'POST':
+        formulario = ReleaseByAlbum(request.POST)
+        if formulario.is_valid():
+            album = formulario.cleaned_data['album']
+            releases = ReleasesJuno.objects.filter(title__contains=album)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_album_beatport(request):
+    formulario = ReleaseByAlbum()
+    album = ""
+    releases = []
+    page_type = "beatport"
+    all_releases = "false"
+    if request.method == 'POST':
+        formulario = ReleaseByAlbum(request.POST)
+        if formulario.is_valid():
+            album = formulario.cleaned_data['album']
+            releases = ReleasesBeatport.objects.filter(title__contains=album)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_album_discogs(request):
+    formulario = ReleaseByAlbum()
+    album = ""
+    releases = []
+    page_type = "discogs"
+    all_releases = "false"
+    if request.method == 'POST':
+        formulario = ReleaseByAlbum(request.POST)
+        if formulario.is_valid():
+            album = formulario.cleaned_data['album']
+            releases = ReleasesDiscogs.objects.filter(title__contains=album)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 

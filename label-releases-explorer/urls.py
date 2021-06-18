@@ -33,4 +33,10 @@ urlpatterns = [
     path('filterbydatebeatport/', views.filter_by_date_beatport),
     path('filterbydatediscogs/', views.filter_by_date_discogs),
     path('filterbydatejuno/', views.filter_by_date_juno),
+    path('filterbyartistjuno/', views.filter_by_artist_juno),
+    path('filterbyartistbeatport/', views.filter_by_artist_beatport),
+    path('filterbyartistdiscogs/', views.filter_by_artist_discogs),
+    path('filterbyalbumjuno/', views.filter_by_album_juno),
+    path('filterbyalbumbeatport/', views.filter_by_album_beatport),
+    path('filterbyalbumdiscogs/', views.filter_by_album_discogs),
 ]

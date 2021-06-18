@@ -11,3 +11,13 @@ class byLabel(forms.Form):
 class ReleasesByDate(forms.Form):
     date = forms.CharField(
         label="Release date", widget=forms.TextInput, required=False)
+
+
+class ReleaseByArtist(forms.Form):
+    artist = forms.CharField(
+        label="Artist name", widget=forms.TextInput, required=False)
+
+
+class ReleaseByAlbum(forms.Form):
+    album = forms.CharField(
+        label="Album name", widget=forms.TextInput, required=False)
