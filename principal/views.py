@@ -8,9 +8,18 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from principal.forms import byLabel, ReleasesByDate, ReleaseByArtist, ReleaseByAlbum, byLabelAll
+from principal.forms import byLabel, ReleasesByDate, ReleaseByArtist, ReleaseByAlbum, byLabelAll, ReleaseByGenre
 from principal.populate import populate_releases_by_label_discogs, populate_releases_by_label_beatport, populate_releases_by_label_juno, get_deezer_album_url
 import re
+from whoosh.index import create_in, open_dir
+from whoosh.fields import Schema, TEXT, DATETIME, ID, KEYWORD, NUMERIC
+from whoosh.qparser import QueryParser
+from whoosh.searching import Searcher
+from whoosh.qparser import MultifieldParser, OrGroup
+from whoosh.qparser.dateparse import DateParserPlugin
+import operator
+from django.db.models import Q
+from functools import reduce
 
 path = "data"
 
@@ -419,6 +428,35 @@ def filter_by_album_all(request):
             if formulario.is_valid():
                 album = formulario.cleaned_data['album']
                 releases = AllReleases.objects.filter(title__contains=album)
+    return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
+
+
+def filter_by_genre_juno(request):
+    formulario = ReleaseByGenre()
+    genre = ""
+    releases = []
+    page_type = "juno"
+    all_releases = "false"
+    if request.method == 'POST':
+        album_id = request.POST.get('albumId', 0)
+        if album_id > 0:
+            album = ReleasesJuno.objects.filter(id=album_id)[0]
+            artist, title = filter_album_and_artist(album)
+            album_and_artist = str(artist) + " " + str(title)
+            get_deezer_album_url(album_and_artist)
+        formulario = ReleaseByGenre(request.POST)
+        if formulario.is_valid():
+            genre = formulario.cleaned_data['genre']
+            ix = open_dir("Index")
+            with ix.searcher() as searcher:
+                doc = searcher.documents()
+                query = QueryParser(
+                    "genre", ix.schema).parse(str(genre))
+                results = searcher.search(query)
+                results = [res['catalog_number'] for res in results]
+                releases = ReleasesJuno.objects.filter(
+                    catalog_number__in=results)
+                print(releases)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 

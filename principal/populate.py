@@ -10,6 +10,15 @@ from datetime import datetime
 import re
 import json
 import os
+from whoosh.index import create_in, open_dir
+from whoosh.writing import AsyncWriter
+from whoosh.fields import Schema, TEXT, DATETIME, ID, KEYWORD, NUMERIC
+from whoosh.qparser import QueryParser
+from whoosh.searching import Searcher
+from whoosh.qparser import MultifieldParser, OrGroup
+from whoosh.qparser.dateparse import DateParserPlugin
+import shutil
+import sys
 
 ARL = "f7bf81223f117d96a012d7fd7c7b3090932438264ac5b8f82aa7d17f975560969c64b437f50d03b6b2005d026f8e76138d556874e2423c6a5c06cbd854c790e53b056317baa8c47857b2442e0763e6f7dfa143209f6b61ff60c10cc14aa22747"
 DOWNLOAD_DIR = "E:/Audio/"
@@ -112,6 +121,16 @@ def populate_releases_by_label_beatport(label_name, allServices, num):
 
 def populate_releases_by_label_juno(label_name, allServices, num):
     print("Loading juno label releases...")
+    schem = Schema(catalog_number=TEXT(stored=True), genre=TEXT(stored=True))
+
+    if os.path.exists("Index"):
+        shutil.rmtree("Index")
+    os.mkdir("Index")
+
+    ix = create_in("Index", schema=schem)
+    writer = AsyncWriter(ix)
+    i = 0
+
     if allServices != True:
         ReleasesJuno.objects.all().delete()
 
@@ -142,14 +161,15 @@ def populate_releases_by_label_juno(label_name, allServices, num):
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             future_to_url = {executor.submit(
-                juno_iterate_releases, release, allServices): release for release in list_of_releases}
+                juno_iterate_releases, release, allServices, writer): release for release in list_of_releases}
 
     if allServices != True:
         print("Juno releases inserted: " + str(ReleasesJuno.objects.count()))
         print("-------------------------------------------------")
+    writer.commit()
 
 
-def juno_iterate_releases(release, allServices):
+def juno_iterate_releases(release, allServices, writer):
     artist = release.find("div", class_="juno-artist").text.strip()
     cat_date = release.find(
         "div", class_="mb-lg-4").find_all("br")
@@ -160,6 +180,22 @@ def juno_iterate_releases(release, allServices):
     image = str()
     image = re.findall(r"(https.*.jpg)", str(release.find(
         "img")))[0]
+
+    genre = ""
+    try:
+        genre = list(release.find(
+            "div", class_="text-sm").stripped_strings)[2].replace("Juno Recommends", "").strip()
+    except:
+        pass
+    if genre != "":
+        print("** " + catalog_number + "   " + genre + " **")
+        try:
+            print()
+            writer.add_document(catalog_number=str(
+                catalog_number), genre=str(genre))
+        except Exception as e:
+            print(e)
+            pass
     if allServices == True:
         AllReleases.objects.create(artist=str(artist), catalog_number=str(
             catalog_number), title=str(title), year=str(year), image=str(image))
