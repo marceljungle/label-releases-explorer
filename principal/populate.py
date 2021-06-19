@@ -33,7 +33,7 @@ def populateDatabase(request):
     return HttpResponseRedirect('/inicio')
 
 
-def populate_releases_by_label_discogs(label_name, allServices):
+def populate_releases_by_label_discogs(label_name, allServices, num):
     print("Loading discogs label releases...")
     if allServices != True:
         ReleasesDiscogs.objects.all().delete()
@@ -53,7 +53,9 @@ def populate_releases_by_label_discogs(label_name, allServices):
     num_pages = int(pagination_section[len(
         pagination_section) - 1].text.strip())
     discogs_releases_list = []
-    for i in range(0, num_pages):  # num_pages
+    if num > 0:
+        num_pages = num
+    for i in range(0, num_pages):
         url_page_label = label_link + "&limit=500&page=" + str(i + 1)
         releases_in_page = requests.get(
             url_page_label, headers=headers).content
@@ -70,7 +72,7 @@ def populate_releases_by_label_discogs(label_name, allServices):
         print("-------------------------------------------------")
 
 
-def populate_releases_by_label_beatport(label_name, allServices):
+def populate_releases_by_label_beatport(label_name, allServices, num):
     if allServices != True:
         ReleasesBeatport.objects.all().delete()
     print("Loading beatport label releases...")
@@ -88,7 +90,8 @@ def populate_releases_by_label_beatport(label_name, allServices):
 
     num_pages = int(pagination_section[len(
         pagination_section) - 1].text.strip())
-
+    if num > 0:
+        num_pages = num
     for i in range(0, num_pages):  # num_pages
         url_page_label = label_link + "?page=" + str(i + 1)
         releases_in_page = requests.get(
@@ -107,7 +110,7 @@ def populate_releases_by_label_beatport(label_name, allServices):
         print("-------------------------------------------------")
 
 
-def populate_releases_by_label_juno(label_name, allServices):
+def populate_releases_by_label_juno(label_name, allServices, num):
     print("Loading juno label releases...")
     if allServices != True:
         ReleasesJuno.objects.all().delete()
@@ -126,6 +129,8 @@ def populate_releases_by_label_juno(label_name, allServices):
     pagination_section = label_page_soup.find_all(
         "div", class_="dropdown-menu-right")[2].find_all("a", class_="dropdown-item")[-1].text
     num_pages = int(pagination_section)
+    if num > 0:
+        num_pages = num
     for i in range(0, num_pages):  # num_pages
         url_page_label = label_link_cache_joker + "/" + str(i + 1)
         releases_in_page = requests.get(

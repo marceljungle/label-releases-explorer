@@ -6,6 +6,14 @@ from principal.models import ReleasesDiscogs, ReleasesBeatport
 class byLabel(forms.Form):
     label = forms.CharField(label="Label name",
                             widget=forms.TextInput, required=False)
+    num = forms.IntegerField(label="Number of releases:",
+                             widget=forms.TextInput, required=False)
+
+class byLabelAll(forms.Form):
+    label = forms.CharField(label="Label name",
+                            widget=forms.TextInput, required=False)
+    num = forms.IntegerField(label="Number of releases:",
+                             widget=forms.TextInput, required=False)
 
 
 class ReleasesByDate(forms.Form):

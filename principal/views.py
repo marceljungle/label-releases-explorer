@@ -8,7 +8,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from principal.forms import byLabel, ReleasesByDate, ReleaseByArtist, ReleaseByAlbum
+from principal.forms import byLabel, ReleasesByDate, ReleaseByArtist, ReleaseByAlbum, byLabelAll
 from principal.populate import populate_releases_by_label_discogs, populate_releases_by_label_beatport, populate_releases_by_label_juno, get_deezer_album_url
 import re
 
@@ -18,19 +18,19 @@ path = "data"
 
 
 def show_releases_by_label_all(request):
-    formulario = byLabel()
+    formulario = byLabelAll()
     fecha = 0
     releases = []
     page_type = "all"
     all_releases = "true"
     if request.method == 'POST':
-        formulario = byLabel(request.POST)
+        formulario = byLabelAll(request.POST)
         if formulario.is_valid():
             label = formulario.cleaned_data['label']
             AllReleases.objects.all().delete()
-            populate_releases_by_label_beatport(label, True)
-            populate_releases_by_label_discogs(label, True)
-            populate_releases_by_label_juno(label, True)
+            populate_releases_by_label_beatport(label, True, 0)
+            populate_releases_by_label_discogs(label, True, 0)
+            populate_releases_by_label_juno(label, True, 0)
             releases = AllReleases.objects.all()
             response = redirect('/releasesall')
             return response
@@ -42,12 +42,14 @@ def show_releases_by_label_discogs(request):
     fecha = 0
     releases = []
     page_type = "discogs"
+    num = 0
     all_releases = "true"
     if request.method == 'POST':
         formulario = byLabel(request.POST)
         if formulario.is_valid():
             label = formulario.cleaned_data['label']
-            populate_releases_by_label_discogs(label)
+            num = formulario.cleaned_data['num']
+            populate_releases_by_label_discogs(label, False, int(num))
             releases = ReleasesDiscogs.objects.all()
             response = redirect('/releasesdiscogs')
             return response
@@ -137,7 +139,8 @@ def show_releases_by_label_beatport(request):
         formulario = byLabel(request.POST)
         if formulario.is_valid():
             label = formulario.cleaned_data['label']
-            populate_releases_by_label_beatport(label)
+            num = formulario.cleaned_data['num']
+            populate_releases_by_label_beatport(label, False, int(num))
             releases = ReleasesBeatport.objects.all()
             response = redirect('/releasesbeatport')
             return response
@@ -154,7 +157,8 @@ def show_releases_by_label_juno(request):
         formulario = byLabel(request.POST)
         if formulario.is_valid():
             label = formulario.cleaned_data['label']
-            populate_releases_by_label_juno(label)
+            num = formulario.cleaned_data['num']
+            populate_releases_by_label_juno(label, False, int(num))
             releases = ReleasesJuno.objects.all()
             response = redirect('/releasesjuno')
             return response
