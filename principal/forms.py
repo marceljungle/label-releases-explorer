@@ -6,7 +6,7 @@ from principal.models import ReleasesDiscogs, ReleasesBeatport
 class byLabel(forms.Form):
     label = forms.CharField(label="Label name",
                             widget=forms.TextInput, required=False)
-    num = forms.IntegerField(label="Number of releases:",
+    num = forms.IntegerField(label="Number of pages to index (0 to index them all):",
                              widget=forms.TextInput, required=False)
 
 

@@ -70,7 +70,6 @@ def filter_album_and_artist(album):
     title = album.title
     if "feat" in album.artist:
         artist = re.findall(r"([\w\d\D\W]*)feat([\w\d\W]*)", album.artist)
-        print(artist)
         artist = str(artist[0][0]) + " " + str(artist[0][1])
     if "/" in album.artist:
         artist = re.findall(r"([\w\d\s]*)/", album.artist)[0]
@@ -305,7 +304,6 @@ def filter_by_artist_discogs(request):
     if request.method == 'POST':
         try:
             album_id = request.POST.get('albumId', '')
-            print(album_id)
             album = ReleasesDiscogs.objects.filter(id=album_id)[0]
             artist, title = filter_album_and_artist(album)
             album_and_artist = str(artist) + " " + str(title)
@@ -328,7 +326,6 @@ def filter_by_artist_juno(request):
     if request.method == 'POST':
         try:
             album_id = request.POST.get('albumId', '')
-            print(album_id)
             album = ReleasesJuno.objects.filter(id=album_id)[0]
             artist, title = filter_album_and_artist(album)
             album_and_artist = str(artist) + " " + str(title)
@@ -350,7 +347,6 @@ def filter_by_album_juno(request):
     if request.method == 'POST':
         try:
             album_id = request.POST.get('albumId', '')
-            print(album_id)
             album = ReleasesJuno.objects.filter(id=album_id)[0]
             artist, title = filter_album_and_artist(album)
             album_and_artist = str(artist) + " " + str(title)
@@ -372,7 +368,6 @@ def filter_by_album_beatport(request):
     if request.method == 'POST':
         try:
             album_id = request.POST.get('albumId', '')
-            print(album_id)
             album = ReleasesBeatport.objects.filter(id=album_id)[0]
             artist, title = filter_album_and_artist(album)
             album_and_artist = str(artist) + " " + str(title)
@@ -395,7 +390,6 @@ def filter_by_album_discogs(request):
     if request.method == 'POST':
         try:
             album_id = request.POST.get('albumId', '')
-            print(album_id)
             album = ReleasesDiscogs.objects.filter(id=album_id)[0]
             artist, title = filter_album_and_artist(album)
             album_and_artist = str(artist) + " " + str(title)
@@ -418,7 +412,6 @@ def filter_by_album_all(request):
     if request.method == 'POST':
         try:
             album_id = request.POST.get('albumId', '')
-            print(album_id)
             album = AllReleases.objects.filter(id=album_id)[0]
             artist, title = filter_album_and_artist(album)
             album_and_artist = str(artist) + " " + str(title)
@@ -456,7 +449,6 @@ def filter_by_genre_juno(request):
                 results = [res['catalog_number'] for res in results]
                 releases = ReleasesJuno.objects.filter(
                     catalog_number__in=results)
-                print(releases)
     return render(request, 'index.html', {'formulario': formulario, 'releases': releases, 'page_type': page_type, 'all_releases': all_releases, 'STATIC_URL': settings.STATIC_URL})
 
 

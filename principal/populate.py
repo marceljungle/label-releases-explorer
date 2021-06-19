@@ -109,7 +109,6 @@ def populate_releases_by_label_beatport(label_name, allServices, num):
         list_of_releases = releases_in_page_soup.find_all(
             "li", class_="bucket-item")
         releases_list = list()
-
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             future_to_url = {executor.submit(
                 beatport_iterate_releases, release, allServices): release for release in list_of_releases}
@@ -188,9 +187,7 @@ def juno_iterate_releases(release, allServices, writer):
     except:
         pass
     if genre != "":
-        print("** " + catalog_number + "   " + genre + " **")
         try:
-            print()
             writer.add_document(catalog_number=str(
                 catalog_number), genre=str(genre))
         except Exception as e:
