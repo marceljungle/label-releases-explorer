@@ -11,8 +11,10 @@
 <body>
 {% if formulario %}
  <form  class="center" id="formulario" method="post" action=''>{% csrf_token %}
-    <div style="margin-left:100px">
-    {{formulario}}
+    <div style="margin-left:110px">
+    <div style="margin-left:110px">
+    {{formulario|linebreaks}}
+     </div>
      </div>
      <input type='submit' value='Search' class="button"/>
 </form>
