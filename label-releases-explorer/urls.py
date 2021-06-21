@@ -43,5 +43,6 @@ urlpatterns = [
     path('filterbyalbumjuno/', views.filter_by_album_juno),
     path('filterbyalbumbeatport/', views.filter_by_album_beatport),
     path('filterbyalbumdiscogs/', views.filter_by_album_discogs),
-    path('filterbyalbumall/', views.filter_by_album_all)
+    path('filterbyalbumall/', views.filter_by_album_all),
+    path('filterbygenrejuno/', views.filter_by_genre_juno)
 ]

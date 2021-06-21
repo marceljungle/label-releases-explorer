@@ -6,8 +6,9 @@ from principal.models import ReleasesDiscogs, ReleasesBeatport
 class byLabel(forms.Form):
     label = forms.CharField(label="Label name",
                             widget=forms.TextInput, required=False)
-    num = forms.IntegerField(label="Number of releases:",
+    num = forms.IntegerField(label="Number of pages to index (0 to index them all):",
                              widget=forms.TextInput, required=False)
+
 
 class byLabelAll(forms.Form):
     label = forms.CharField(label="Label name",
@@ -29,3 +30,8 @@ class ReleaseByArtist(forms.Form):
 class ReleaseByAlbum(forms.Form):
     album = forms.CharField(
         label="Album name", widget=forms.TextInput, required=False)
+
+
+class ReleaseByGenre(forms.Form):
+    genre = forms.CharField(
+        label="Genre name", widget=forms.TextInput, required=False)
